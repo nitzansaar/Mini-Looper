@@ -5,8 +5,7 @@ using UnityEngine.SceneManagement;
 
 
 public class GameManager : MonoBehaviour {
-//    private const bool V = false;
-//    public GameObject canvas;
+   public GameObject canvas;
 
 
    [System.Serializable]
@@ -38,7 +37,7 @@ public class GameManager : MonoBehaviour {
        Debug.Log("GameManager Start method is being executed.");
 
 
-    //    canvas.SetActive(false);
+       canvas.SetActive(false);
 
 
        Vector2 dimensions = CheckDimensions ();
@@ -165,7 +164,7 @@ public class GameManager : MonoBehaviour {
 
    public void Win()
    {
-    //    canvas.SetActive(true);
+       canvas.SetActive(true);
        Debug.Log("You win");
    }
 
