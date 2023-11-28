@@ -7,6 +7,9 @@ using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour {
    public GameObject canvas;
 
+   public GameObject[] piecePrefabs;
+   public bool generateRandom;
+
 
    [System.Serializable]
    public class Puzzle
@@ -38,26 +41,39 @@ public class GameManager : MonoBehaviour {
 
 
        canvas.SetActive(false);
+        if (generateRandom)
+        {
+            if (puzzle.width == 0 || puzzle.height == 0)
+            {
+                Debug.LogError("Please set the dimensions");
+                Debug.Break();
+            }
+            GeneratePuzzle();
 
 
-       Vector2 dimensions = CheckDimensions ();
+        }
+        else 
+        {
+            Vector2 dimensions = CheckDimensions ();
 
 
-       puzzle.width = (int)dimensions.x;
-       puzzle.height = (int)dimensions.y;
+            puzzle.width = (int)dimensions.x;
+            puzzle.height = (int)dimensions.y;
 
 
 
 
-       puzzle.pieces = new piece[puzzle.width, puzzle.height];
+            puzzle.pieces = new piece[puzzle.width, puzzle.height];
 
 
-       GameObject[] pieces = GameObject.FindGameObjectsWithTag("Piece");
-       foreach (var piece in pieces)
-       {
-           puzzle.pieces [(int)piece.transform.position.x, (int)piece.transform.position.y] = piece.GetComponent<piece>();
-        //    Debug.Log("test");
-       }
+            GameObject[] pieces = GameObject.FindGameObjectsWithTag("Piece");
+            foreach (var piece in pieces)
+            {
+                puzzle.pieces [(int)piece.transform.position.x, (int)piece.transform.position.y] = piece.GetComponent<piece>();
+                //    Debug.Log("test");
+            }
+        }
+
     //    foreach(var piece in puzzle.pieces)
     //    {
     //        Debug.Log("hello");
@@ -72,6 +88,69 @@ public class GameManager : MonoBehaviour {
 
        puzzle.currValue = Sweep();
 
+
+   }
+
+   void GeneratePuzzle()
+   {
+        puzzle.pieces = new piece[puzzle.width, puzzle.height];
+
+
+        int[] auxValues = {0, 0, 0, 0};
+        for (int h = 0; h < puzzle.height; h++)
+        {
+            for (int w = 0; w < puzzle.width; w++)
+            {
+                if (w == 0)
+                {
+                    auxValues[3] = 0;
+                }
+                else
+                {
+                    auxValues[3] = puzzle.pieces[w - 1, h].values[1];
+                }
+                if (w == puzzle.width - 1)
+                {
+                    auxValues[1] = 0;
+                }
+                else
+                {
+                    auxValues[1] = Random.Range(0, 2);
+                }
+
+                if (h == 0)
+                {
+                    auxValues[2] = 0;
+                }
+                else
+                {
+                    auxValues[2] = puzzle.pieces[w, h - 1].values[0];
+                }
+                if (h == puzzle.height - 1)
+                {
+                    auxValues[0] = 0;
+                }
+                else
+                {
+                    auxValues[0] = Random.Range(0, 2);
+                }
+                int valueSum = auxValues[0] + auxValues[1] + auxValues[2] + auxValues[3];
+
+                if (valueSum == 2 && auxValues[0] != auxValues[2])
+                {
+                    valueSum = 5;
+                }
+
+                GameObject go = Instantiate(piecePrefabs[valueSum], new Vector3(w, h, 0), Quaternion.identity);
+
+                while (go.GetComponent<piece>().values[0] != auxValues[0] || go.GetComponent<piece>().values[1] != auxValues[1]
+                || go.GetComponent<piece>().values[2] != auxValues[2] || go.GetComponent<piece>().values[3] != auxValues[3])
+                {
+                    go.GetComponent<piece>().RotatePiece();
+                }
+                puzzle.pieces[w, h] = go.GetComponent<piece>();
+            }
+        }
 
    }
 
